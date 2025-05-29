@@ -1,6 +1,7 @@
-import { join, dirname } from 'path';
+import path, { join, dirname } from 'path';
 import { createRequire } from 'module';
-import { fileURLToPath } from 'url';
+import { fileURLToPath as fileURLToPathNative } from 'node:url';
+import { dirname as dirnameNative } from 'node:path';
 import { setupMaster, fork } from 'cluster';
 import { watchFile, unwatchFile } from 'fs';
 import cfonts from 'cfonts';
@@ -18,18 +19,12 @@ const app = express();
 const port = process.env.PORT || 3000;
 
 app.get('/', (req, res) => {
-  res.send(`Il bot WhatsApp RINOX-MD è attivo sulla porta "${port}" per qualunque problema contattare l'owner al seguente link: https://wa.me/393445461546`);
+  res.send(`Il bot WhatsApp GIUSEMD è attivo sulla porta "${port}" per qualunque problema contattare l'owner al seguente link: https://wa.me/393445461546`);
 });
 
 app.listen(port, () => {
   console.log(`Server web in ascolto sulla porta ${port}`);
 });
-
-// Configurazioni iniziali
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const require = createRequire(__dirname);
-const { name, author } = require(join(__dirname, './package.json'));
-const rl = createInterface(process.stdin, process.stdout);
 
 // Funzione per messaggi animati
 const animatedMessage = (text, font = 'block', colors = ['cyan', 'blue'], align = 'center') => {
@@ -41,11 +36,14 @@ const animatedMessage = (text, font = 'block', colors = ['cyan', 'blue'], align 
   });
 };
 
-
 console.clear();
-animatedMessage('rinox\nBot', 'block', ['green', 'cyan']);
-console.log('\n💣 Sistema in avvio...');
-console.log('⏰🔁 Preparazione dei moduli...\n');
+animatedMessage('Giuse\nBot', 'block', ['magenta', 'cyan']);
+console.log('\n🔥 Sistema in avvio...');
+console.log('⏳ Preparazione dei moduli...');
+console.log('©️ Crediti & Supporto bot:');
+console.log('1️⃣ https://whatsapp.com/channel/0029Vb6YYdN6LwHeloTW8409');
+console.log('2️⃣ https://whatsapp.com/channel/0029VaitzuD3mFYDnJJNWH3Q');
+console.log('⚠️ Per qualsiasi informazione, contatta: +39 344 546 1546\n');
 
 // Variabile per controllo dello stato
 let isRunning = false;
@@ -60,8 +58,8 @@ function start(file) {
 
   const args = [join(__dirname, file), ...process.argv.slice(2)];
 
-  animatedMessage('Ediz by elking', 'console', ['yellow', 'green']);
-  console.log('✅ Inizializzazione completata.\n');
+  animatedMessage('Ediz by Giu', 'console', ['yellow', 'green']);
+  console.log('🚀 Inizializzazione completata.\n');
 
   // Configurazione del cluster
   setupMaster({
@@ -72,9 +70,11 @@ function start(file) {
   let processInstance = fork();
 
   processInstance.on('message', (data) => {
-    console.log('[💲 RICEVUTO]', data);
+    console.log('[📩 RICEVUTO]', data);
     switch (data) {
       case 'reset':
+        console.log('🔄 Ricevuto comando di reset. Riavvio del worker...');
+        processInstance.removeAllListeners(); // Rimuovi tutti i listener per evitare comportamenti imprevisti
         processInstance.kill();
         isRunning = false;
         start(file);
@@ -85,16 +85,26 @@ function start(file) {
     }
   });
 
-  processInstance.on('exit', (_, code) => {
+  processInstance.on('exit', (code) => {
     isRunning = false;
-    console.error('😵 Errore inatteso:', code);
+    console.error('❌ Errore inatteso del worker:', code);
 
     if (code !== 0) {
+      console.log('⚠️ Rilevato un errore. Monitoraggio del file per il riavvio automatico...');
       watchFile(args[0], () => {
         unwatchFile(args[0]);
+        console.log('✅ Il file è stato modificato. Tentativo di riavvio del worker...');
         start(file);
       });
     }
+  });
+
+  processInstance.on('error', (err) => {
+    console.error('🚨 Errore nella comunicazione con il worker:', err);
+    isRunning = false;
+    // Potresti implementare qui una logica di riavvio più aggressiva se necessario
+    console.log('⚠️ Tentativo di riavvio del worker a causa di un errore...');
+    start(file);
   });
 
   // Gestione input da console
