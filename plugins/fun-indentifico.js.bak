@@ -1,0 +1,36 @@
+import { performance } from 'perf_hooks';
+
+
+━━━━━━━━━━━━━━━━━━━━━
+👤 *Persona:* ${text}
+🪐 *Trasformazione:* ${pickRandom([
+        'grande scimmia ',
+        'falso sayan',
+        'kaioken',
+        'Sayan di primo livello',
+        'Sayan di secondo livello',
+        'Sayan di terzo livello',
+        'Sayan God',
+        'Sayan Blue',
+        'Ultra Istinto',
+        
+        
+      
+    ])}
+    ꙰ 𝟥𝟥𝟥 ꙰ 𝔹𝕆𝕋 ꙰
+━━━━━━━━━━━━━━━━━━━━━
+
+🕒 *Tempo di esecuzione:* ${speed}
+`.trim();
+
+    m.reply(doxeo, null, { mentions: conn.parseMention(doxeo) });
+};
+
+handler.help = ['doxear <nome> | <@tag>'];
+handler.tags = ['fun'];
+handler.command = /^sayan$/i;
+export default handler;
+
+function pickRandom(list) {
+    return list[Math.floor(Math.random() * list.length)];
+}

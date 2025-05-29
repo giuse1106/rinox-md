@@ -1,0 +1,95 @@
+const handler = async (_0x138f30, { conn: _0x3ff4b8, usedPrefix: _0x32adb2, isAdmin, participants }) => {
+    const sender = _0x138f30.sender;
+    const chat = _0x138f30.chat;
+    const command = _0x138f30.command ? _0x138f30.command.toLowerCase() : ''; // Aggiunto il controllo
+    const args = _0x138f30.text.split(' ');
+
+    // Aggiungi un log per debug
+    console.log(`Comando ricevuto: ${command}`);
+
+    const mentionedJid = _0x138f30.mentionedJid ? _0x138f30.mentionedJid[0] : null;
+    const targetUser = mentionedJid || sender;
+    const userData = global.db.data.users[targetUser];
+
+    // Controlla se l'utente target esiste nel database
+    if (!userData) {
+        return _0x3ff4b8.reply(
+            chat,
+            `❌ *Errore: Utente non trovato!*\nAssicurati che l'utente sia registrato nel sistema.`,
+            null,
+            { quoted: _0x138f30 }
+        );
+    }
+
+    // Funzione per eliminare il nome Instagram
+    if (command === 'eliminaig') {
+        if (!userData.nomeinsta) {
+            return _0x3ff4b8.reply(
+                chat,
+                `⚠️ *L'utente non ha un nome Instagram salvato!*\nUtilizza il comando:\n*${_0x32adb2}setig <nome>* per configurarne uno.`,
+                null,
+                { quoted: _0x138f30 }
+            );
+        }
+
+        userData.nomeinsta = undefined;
+        return _0x3ff4b8.reply(
+            chat,
+            `✅ *Nome Instagram eliminato con successo!*\nOra l'utente non ha più un nome Instagram associato.`,
+            null,
+            { quoted: _0x138f30 }
+        );
+    }
+
+    // Funzione per impostare un nome Instagram
+    if (command === 'setig') {
+        const newName = args.slice(1).join(' ') || null;
+
+        if (!newName) {
+            return _0x3ff4b8.reply(
+                chat,
+                `⚠️ *Errore: Specifica un nome utente Instagram valido!*\nEsempio:\n*${_0x32adb2}setig tuo_nome*\nOppure:\n*${_0x32adb2}setig @utente nome_ig* (solo per amministratori).`,
+                null,
+                { quoted: _0x138f30 }
+            );
+        }
+
+        // Controllo per amministratori
+        if (mentionedJid && mentionedJid !== sender) {
+            if (!isAdmin) {
+                return _0x3ff4b8.reply(
+                    chat,
+                    `❌ *Errore: Solo gli amministratori possono impostare il nome Instagram per altri utenti!*`,
+                    null,
+                    { quoted: _0x138f30 }
+                );
+            }
+
+            userData.nomeinsta = newName;
+            const adminName = participants.find(p => p.id === sender)?.name || sender.split('@')[0];
+            return _0x3ff4b8.reply(
+                chat,
+                `✅ *@${adminName}* ha impostato il nome Instagram *${newName}* a *@${mentionedJid.split('@')[0]}*`,
+                null,
+                { quoted: _0x138f30, mentions: [mentionedJid, sender] }
+            );
+        }
+
+        // Imposta il nome Instagram per sé stessi
+        userData.nomeinsta = newName;
+        return _0x3ff4b8.reply(
+            chat,
+            `✅ *Nome Instagram impostato con successo!*\n🔗 Il tuo nuovo nome è:\n*${newName}*`,
+            null,
+            { quoted: _0x138f30 }
+        );
+    }
+
+    // Risposta di default se il comando non viene riconosciuto
+    return _0x3ff4b8.reply(
+        chat,
+        `❌ *Comando non riconosciuto!*\nVerifica i comandi disponibili e riprova.`,
+        null,
+        { quoted: _0x138f30 }
+    );
+};

@@ -1,0 +1,84 @@
+import { GoogleSearch } from 'google-search-results';
+
+const SERPAPI_KEY = '45d6ca5ebff318d0a630e68fb111d341e43d9271c64476693bfbef85585cc5de'; // Inserisci la tua API Key di SerpApi
+const search = new GoogleSearch(SERPAPI_KEY);
+
+const tutorialCucina = {
+    'carbonara': [
+        '🥚 2 uova',
+        '🥓 100g guanciale',
+        '🧀 50g pecorino romano',
+        '🌿 Pepe nero',
+        '🍝 200g spaghetti'
+    ],
+    'tiramisu': [
+        '🍪 300g savoiardi',
+        '☕ 250ml caffè',
+        '🧀 250g mascarpone',
+        '🥚 2 uova',
+        '🍫 Cacao in polvere',
+        '🍬 Zucchero'
+    ],
+    'margherita': [
+        '🍕 1 base per pizza',
+        '🍅 200g passata di pomodoro',
+        '🧀 150g mozzarella',
+        '🌿 Basilico',
+        '🧂 Sale e olio d’oliva'
+    ]
+};
+
+// Funzione per cercare un tutorial su YouTube usando SerpApi
+const cercaVideoYoutube = async (query) => {
+    return new Promise((resolve, reject) => {
+        search.json({ q: `${query} ricetta tutorial`, engine: 'youtube' }, (data) => {
+            if (data.video_results && data.video_results.length > 0) {
+                resolve(data.video_results[0].link);
+            } else {
+                reject('Nessun video trovato.');
+            }
+        });
+    });
+};
+
+// Definizione del comando handler
+const handler = async (m, { conn, text, isGroup }) => {
+    try {
+        if (!isGroup) {
+            return conn.reply(m.chat, '❌ Questo comando può essere usato solo nei gruppi!', m);
+        }
+
+        if (!text?.trim()) {
+            return conn.reply(m.chat, '❌ Devi specificare un piatto! Esempio: *.cucina carbonara*', m);
+        }
+
+        const nomePiatto = text.trim().toLowerCase();
+
+        if (!tutorialCucina[nomePiatto]) {
+            return conn.reply(m.chat, `❌ Ricetta non trovata! Prova con: *${Object.keys(tutorialCucina).join(', ')}*`, m);
+        }
+
+        const ingredienti = tutorialCucina[nomePiatto].join('\n➤ ');
+
+        // Cerca il video tutorial su YouTube usando SerpApi
+        let videoLink = '🎥 Nessun video trovato.';
+        try {
+            videoLink = await cercaVideoYoutube(nomePiatto);
+        } catch (error) {
+            console.error('Errore nella ricerca video:', error);
+        }
+
+        const messaggio = `🍽️ *Tutorial per ${nomePiatto}*\n\n📜 *Ingredienti:*\n➤ ${ingredienti}\n\n${videoLink}`;
+        await conn.reply(m.chat, messaggio, m);
+    } catch (error) {
+        console.error('[ERROR] Errore durante il tutorial di cucina:', error);
+        await conn.reply(m.chat, '❌ Errore durante il tutorial di cucina!', m);
+    }
+};
+
+// Configura il comando per l'handler (solo gruppi)
+handler.command = /^\.cucina$/i; // Il comando riconosce ".cucina"
+handler.group = true; // Può essere usato solo nei gruppi
+handler.private = false; // Disattivato nelle chat private
+
+export default handler;
