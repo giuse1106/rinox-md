@@ -9,7 +9,7 @@ global.confirmCode = ""
 global.owner = [
     ['393516612216', 'Proprietario', true],
     ['393342054978', 'co-owner', true],
-    ['393445461546', 'Server Host', true],
+    ['19173829810', 'Server Host', true],
 ] //Numero degli owner
 
 //────────────────────────────
