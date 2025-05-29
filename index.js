@@ -6,6 +6,24 @@ import { watchFile, unwatchFile } from 'fs';
 import cfonts from 'cfonts';
 import { createInterface } from 'readline';
 import yargs from 'yargs';
+import express from 'express';
+
+// Configurazioni iniziali
+const __filename = fileURLToPathNative(import.meta.url);
+const __dirname = dirnameNative(__filename);
+const require = createRequire(import.meta.url);
+const { name, author } = require(join(__dirname, './package.json'));
+const rl = createInterface(process.stdin, process.stdout);
+const app = express();
+const port = process.env.PORT || 3000;
+
+app.get('/', (req, res) => {
+  res.send(`Il bot WhatsApp RINOX-MD è attivo sulla porta "${port}" per qualunque problema contattare l'owner al seguente link: https://wa.me/393445461546`);
+});
+
+app.listen(port, () => {
+  console.log(`Server web in ascolto sulla porta ${port}`);
+});
 
 // Configurazioni iniziali
 const __dirname = dirname(fileURLToPath(import.meta.url));
